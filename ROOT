@@ -5,7 +5,6 @@ session LambdaGT = HOL +
     "HOL-Library"
   theories
     STLC
-    LambdaGT_Econg
     LambdaGT_Core
     LambdaGT_LI
   document_files
