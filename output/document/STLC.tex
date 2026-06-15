@@ -1,0 +1,2338 @@
+%
+\begin{isabellebody}%
+\setisabellecontext{STLC}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsection{Simply Typed Lambda-Calculus%
+}
+\isamarkuptrue%
+%
+\isamarkupsubsection{Basic definitions of Untyped Call By Value Lambda-calculus%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isadelimtheory
+%
+\endisadelimtheory
+%
+\isatagtheory
+\isakeywordONE{theory}\isamarkupfalse%
+\ STLC\isanewline
+\isakeywordTWO{imports}\ Main\isanewline
+\isakeywordTWO{begin}%
+\endisatagtheory
+{\isafoldtheory}%
+%
+\isadelimtheory
+\isanewline
+%
+\endisadelimtheory
+\isanewline
+\isanewline
+\isakeywordONE{declare}\isamarkupfalse%
+\ {\isacharbrackleft}{\kern0pt}{\isacharbrackleft}{\kern0pt}syntax{\isacharunderscore}{\kern0pt}ambiguity{\isacharunderscore}{\kern0pt}warning\ {\isacharequal}{\kern0pt}\ false{\isacharbrackright}{\kern0pt}{\isacharbrackright}{\kern0pt}%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Lambda-terms in de Bruijn notation and substitution%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+We first define a link substitution and the operation to apply the substitutions
+  over a link, a list of links, a link substitution
+  and show some properties.%
+\end{isamarkuptext}\isamarkuptrue%
+%
+\begin{isamarkuptext}%
+De Bruijn-style lambda-terms.
+  - Var n : a variable represented by a natural number (de Bruijn index).
+  - App e1 e2 : application (written $e_1 \cdot e_2$).
+  - Abs t e : abstraction $(\lambda t. e)$, which binds one variable.
+  - Val n s : a constructor for base-type values of sort s.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{datatype}\isamarkupfalse%
+\ {\isacharprime}{\kern0pt}ty\ exp\ {\isacharequal}{\kern0pt}\isanewline
+\ \ \ \ Var\ nat\isanewline
+\ \ {\isacharbar}{\kern0pt}\ App\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp{\isachardoublequoteclose}\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp{\isachardoublequoteclose}\ {\isacharparenleft}{\kern0pt}\isakeywordTWO{infixl}\ {\isacartoucheopen}{\isasymcdot}{\isacartoucheclose}\ {\isadigit{2}}{\isadigit{0}}{\isadigit{0}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ Abs\ {\isacharprime}{\kern0pt}ty\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ Val\ nat\ nat%
+\begin{isamarkuptext}%
+The lifting operation "lift t k" shifts free variables in t that are >= k by 1.
+  This is used when we move under a binder (to avoid variable capture).%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{primrec}\isamarkupfalse%
+\isanewline
+\ \ lift\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharprime}{\kern0pt}ty\ exp{\isacharcomma}{\kern0pt}\ nat{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}{\isachargreater}{\kern0pt}\ {\isacharprime}{\kern0pt}ty\ exp{\isachardoublequoteclose}\isanewline
+\isakeywordTWO{where}\isanewline
+\ \ \ \ {\isachardoublequoteopen}lift\ {\isacharparenleft}{\kern0pt}Var\ i{\isacharparenright}{\kern0pt}\ k\ {\isacharequal}{\kern0pt}\ {\isacharparenleft}{\kern0pt}if\ i\ {\isacharless}{\kern0pt}\ k\ then\ Var\ i\ else\ Var\ {\isacharparenleft}{\kern0pt}i\ {\isacharplus}{\kern0pt}\ {\isadigit{1}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \ \isanewline
+\ \ {\isacharbar}{\kern0pt}\ {\isachardoublequoteopen}lift\ {\isacharparenleft}{\kern0pt}e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}{\isacharparenright}{\kern0pt}\ k\ {\isacharequal}{\kern0pt}\ lift\ e{\isadigit{1}}\ k\ {\isasymcdot}\ lift\ e{\isadigit{2}}\ k{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ {\isachardoublequoteopen}lift\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}\ e{\isacharparenright}{\kern0pt}\ k\ {\isacharequal}{\kern0pt}\ Abs\ {\isasymtau}\ {\isacharparenleft}{\kern0pt}lift\ e\ {\isacharparenleft}{\kern0pt}k\ {\isacharplus}{\kern0pt}\ {\isadigit{1}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \ \isanewline
+\ \ {\isacharbar}{\kern0pt}\ {\isachardoublequoteopen}lift\ {\isacharparenleft}{\kern0pt}Val\ v\ s{\isacharparenright}{\kern0pt}\ k\ {\isacharequal}{\kern0pt}\ Val\ v\ s{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Capture-avoiding substitution "e'[e/i]": replace variable i in e' with e.
+  - Variables above k are decremented (indices slide down).
+  - At a binder (Abs), we lift s and substitute at k+1 to account for the new binder.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{primrec}\isamarkupfalse%
+\isanewline
+\ \ subst\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharprime}{\kern0pt}ty\ exp{\isacharcomma}{\kern0pt}\ {\isacharprime}{\kern0pt}ty\ exp{\isacharcomma}{\kern0pt}\ nat{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}{\isachargreater}{\kern0pt}\ {\isacharprime}{\kern0pt}ty\ exp{\isachardoublequoteclose}\ \ {\isacharparenleft}{\kern0pt}{\isacartoucheopen}{\isacharunderscore}{\kern0pt}{\isacharbrackleft}{\kern0pt}{\isacharunderscore}{\kern0pt}{\isacharprime}{\kern0pt}{\isacharslash}{\kern0pt}{\isacharunderscore}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacartoucheclose}\ {\isacharbrackleft}{\kern0pt}{\isadigit{3}}{\isadigit{0}}{\isadigit{0}}{\isacharcomma}{\kern0pt}\ {\isadigit{0}}{\isacharcomma}{\kern0pt}\ {\isadigit{0}}{\isacharbrackright}{\kern0pt}\ {\isadigit{3}}{\isadigit{0}}{\isadigit{0}}{\isacharparenright}{\kern0pt}\isanewline
+\isakeywordTWO{where}\isanewline
+\ \ \ \ subst{\isacharunderscore}{\kern0pt}Var{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Var\ j{\isacharparenright}{\kern0pt}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}\isanewline
+\ \ \ \ \ \ {\isacharparenleft}{\kern0pt}if\ i\ {\isacharless}{\kern0pt}\ j\ then\ Var\ {\isacharparenleft}{\kern0pt}j\ {\isacharminus}{\kern0pt}\ {\isadigit{1}}{\isacharparenright}{\kern0pt}\ else\ if\ j\ {\isacharequal}{\kern0pt}\ i\ then\ e\ else\ Var\ j{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}App{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}{\isacharparenright}{\kern0pt}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ e{\isadigit{1}}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isasymcdot}\ e{\isadigit{2}}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}Abs{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}\ e{\isadigit{1}}{\isacharparenright}{\kern0pt}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ Abs\ {\isasymtau}\ {\isacharparenleft}{\kern0pt}e{\isadigit{1}}{\isacharbrackleft}{\kern0pt}lift\ e\ {\isadigit{0}}\ {\isacharslash}{\kern0pt}\ i{\isacharplus}{\kern0pt}{\isadigit{1}}{\isacharbrackright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}Val{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Val\ v\ s{\isacharparenright}{\kern0pt}{\isacharbrackleft}{\kern0pt}e{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ Val\ v\ s{\isachardoublequoteclose}\isanewline
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{declare}\isamarkupfalse%
+\ subst{\isacharunderscore}{\kern0pt}Var\ {\isacharbrackleft}{\kern0pt}simp\ del{\isacharbrackright}{\kern0pt}\isanewline
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{declare}\isamarkupfalse%
+\ if{\isacharunderscore}{\kern0pt}not{\isacharunderscore}{\kern0pt}P\ {\isacharbrackleft}{\kern0pt}simp{\isacharbrackright}{\kern0pt}\ not{\isacharunderscore}{\kern0pt}less{\isacharunderscore}{\kern0pt}eq\ {\isacharbrackleft}{\kern0pt}simp{\isacharbrackright}{\kern0pt}\isanewline
+\ \ %
+\isamarkupcmt{don't add \isa{r{\isacharunderscore}{\kern0pt}into{\isacharunderscore}{\kern0pt}rtrancl{\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}}%
+}%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Call-By-Value Reduction%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Values are exactly abstractions and base-type literals.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{inductive}\isamarkupfalse%
+\ is{\isacharunderscore}{\kern0pt}val\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp\ {\isasymRightarrow}\ bool{\isachardoublequoteclose}\ \isakeywordTWO{where}\isanewline
+\ \ v{\isacharunderscore}{\kern0pt}abs\ {\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}\ e{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ v{\isacharunderscore}{\kern0pt}nat\ {\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ {\isacharparenleft}{\kern0pt}Val\ v\ s{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Call-by-value small-step relation.
+  - beta\_v: Perform beta only when the argument is already a value.
+  - appL: Evaluate the function part first (left-to-right).
+  - appR: Then evaluate the argument.
+  No reduction happens inside an abstraction.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{inductive}\isamarkupfalse%
+\ cbv\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp\ {\isasymRightarrow}\ {\isacharprime}{\kern0pt}ty\ exp\ {\isasymRightarrow}\ bool{\isachardoublequoteclose}\ \ {\isacharparenleft}{\kern0pt}\isakeywordTWO{infixl}\ {\isachardoublequoteopen}{\isasymrightarrow}\isactrlsub v{\isachardoublequoteclose}\ {\isadigit{5}}{\isadigit{0}}{\isacharparenright}{\kern0pt}\ \isakeywordTWO{where}\isanewline
+\ \ beta{\isacharunderscore}{\kern0pt}v\ {\isacharbrackleft}{\kern0pt}simp{\isacharcomma}{\kern0pt}\ intro{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ v\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ Abs\ {\isasymtau}\ e\ {\isasymcdot}\ v\ {\isasymrightarrow}\isactrlsub v\ e{\isacharbrackleft}{\kern0pt}v{\isacharslash}{\kern0pt}{\isadigit{0}}{\isacharbrackright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ appL\ \ \ {\isacharbrackleft}{\kern0pt}simp{\isacharcomma}{\kern0pt}\ intro{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}e{\isadigit{1}}\ {\isasymrightarrow}\isactrlsub v\ e{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}\ {\isasymrightarrow}\isactrlsub v\ e{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isasymcdot}\ e{\isadigit{2}}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ appR\ \ \ {\isacharbrackleft}{\kern0pt}simp{\isacharcomma}{\kern0pt}\ intro{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ v\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ e\ {\isasymrightarrow}\isactrlsub v\ e{\isacharprime}{\kern0pt}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ v\ {\isasymcdot}\ e\ {\isasymrightarrow}\isactrlsub v\ v\ {\isasymcdot}\ e{\isacharprime}{\kern0pt}{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Inversion rules for the step relation.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{inductive{\isacharunderscore}{\kern0pt}cases}\isamarkupfalse%
+\ cbv{\isacharunderscore}{\kern0pt}cases\ {\isacharbrackleft}{\kern0pt}elim{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}Var\ i\ {\isasymrightarrow}\isactrlsub v\ e{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}Abs\ {\isasymtau}\ e{\isadigit{1}}\ {\isasymrightarrow}\isactrlsub v\ e{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}\ {\isasymrightarrow}\isactrlsub v\ e{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}Val\ v\ s\ {\isasymrightarrow}\isactrlsub v\ e{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Zero or more reductions.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{abbreviation}\isamarkupfalse%
+\ cbv{\isacharunderscore}{\kern0pt}star\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}ty\ exp\ {\isasymRightarrow}\ {\isacharprime}{\kern0pt}ty\ exp\ {\isasymRightarrow}\ bool{\isachardoublequoteclose}\isanewline
+\ \ {\isacharparenleft}{\kern0pt}\isakeywordTWO{infixl}\ {\isachardoublequoteopen}{\isasymrightarrow}\isactrlsub v\isactrlsup {\isacharasterisk}{\kern0pt}{\isachardoublequoteclose}\ {\isadigit{5}}{\isadigit{0}}{\isacharparenright}{\kern0pt}\ \isakeywordTWO{where}\isanewline
+\ \ {\isachardoublequoteopen}cbv{\isacharunderscore}{\kern0pt}star\ {\isasymequiv}\ rtranclp\ cbv{\isachardoublequoteclose}%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Some examples%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+We first define a link substitution and the operation to apply the substitutions
+  over a link, a list of links, a link substitution
+  and show some properties.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ v{\isacharunderscore}{\kern0pt}abs{\isacharparenright}{\kern0pt}%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isakeywordONE{lemma}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ Val\ {\isadigit{0}}\ {\isadigit{0}}\ {\isasymrightarrow}\isactrlsub v\ Val\ {\isadigit{0}}\ {\isadigit{0}}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}metis\ beta{\isacharunderscore}{\kern0pt}v\ is{\isacharunderscore}{\kern0pt}val{\isachardot}{\kern0pt}simps\ less{\isacharunderscore}{\kern0pt}irrefl\ subst{\isacharunderscore}{\kern0pt}Var{\isacharparenright}{\kern0pt}%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isakeywordONE{lemma}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \ \ \ {\isasymrightarrow}\isactrlsub v\isactrlsup {\isacharasterisk}{\kern0pt}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharminus}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ P{\isadigit{2}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}{\isacharbrackleft}{\kern0pt}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharslash}{\kern0pt}{\isadigit{0}}{\isacharbrackright}{\kern0pt}\isanewline
+\ \ \ \ \ \ \ \ \ \ \ \ {\isacharequal}{\kern0pt}\ {\isacharparenleft}{\kern0pt}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}Var{\isacharparenright}{\kern0pt}\isanewline
+\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ P{\isadigit{3}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \ \ \ \ \ \ \ \ {\isasymrightarrow}\isactrlsub v\ {\isacharparenleft}{\kern0pt}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}metis\ P{\isadigit{2}}\ beta{\isacharunderscore}{\kern0pt}v\ v{\isacharunderscore}{\kern0pt}abs{\isacharparenright}{\kern0pt}\isanewline
+\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ P{\isadigit{4}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}{\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isacharparenright}{\kern0pt}\ {\isasymrightarrow}\isactrlsub v\ Val\ {\isadigit{1}}\ {\isadigit{2}}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}metis\ beta{\isacharunderscore}{\kern0pt}v\ is{\isacharunderscore}{\kern0pt}val{\isachardot}{\kern0pt}simps\ less{\isacharunderscore}{\kern0pt}irrefl\ subst{\isacharunderscore}{\kern0pt}Var{\isacharparenright}{\kern0pt}\isanewline
+\isanewline
+\ \ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}thesis\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ P{\isadigit{3}}\ P{\isadigit{4}}\ \isakeywordONE{by}\isamarkupfalse%
+\ force\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsection{Type System%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+We first define environments and then define typing relations.%
+\end{isamarkuptext}\isamarkuptrue%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Environments%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Environments are represented as lists, where the head corresponds to the
+  most recently inserted binding (de Bruijn-style contexts).%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{type{\isacharunderscore}{\kern0pt}synonym}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}{\isacharprime}{\kern0pt}a{\isacharparenright}{\kern0pt}\ env\ {\isacharequal}{\kern0pt}\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}a\ list{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+\isa{\isafree{insert{\isacharunderscore}{\kern0pt}at}\ \isafree{xs}\ \isafree{j}\ \isafree{x}} inserts element x at position j in xs.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{fun}\isamarkupfalse%
+\ insert{\isacharunderscore}{\kern0pt}at\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharprime}{\kern0pt}a\ env\ {\isasymRightarrow}\ nat\ {\isasymRightarrow}\ {\isacharprime}{\kern0pt}a\ {\isasymRightarrow}\ {\isacharprime}{\kern0pt}a\ env{\isachardoublequoteclose}\ \isakeywordTWO{where}\isanewline
+\ \ {\isachardoublequoteopen}insert{\isacharunderscore}{\kern0pt}at\ xs\ \ \ \ \ \ \ {\isadigit{0}}\ \ \ \ \ \ \ x\ {\isacharequal}{\kern0pt}\ x\ {\isacharhash}{\kern0pt}\ xs{\isachardoublequoteclose}\ {\isacharbar}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}insert{\isacharunderscore}{\kern0pt}at\ {\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ \ \ \ \ \ \ {\isacharparenleft}{\kern0pt}Suc\ n{\isacharparenright}{\kern0pt}\ x\ {\isacharequal}{\kern0pt}\ {\isacharbrackleft}{\kern0pt}x{\isacharbrackright}{\kern0pt}{\isachardoublequoteclose}\ {\isacharbar}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}insert{\isacharunderscore}{\kern0pt}at\ {\isacharparenleft}{\kern0pt}y\ {\isacharhash}{\kern0pt}\ ys{\isacharparenright}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Suc\ n{\isacharparenright}{\kern0pt}\ x\ {\isacharequal}{\kern0pt}\ y\ {\isacharhash}{\kern0pt}\ insert{\isacharunderscore}{\kern0pt}at\ ys\ n\ x{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Inserting at any position increases the environment length by exactly one.)%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ length{\isacharunderscore}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}length\ {\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ j\ y{\isacharparenright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ length\ xs\ {\isacharplus}{\kern0pt}\ {\isadigit{1}}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ xs\ arbitrary{\isacharcolon}{\kern0pt}\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ Nil\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Cons\ a\ xs{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ simp\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Relations between the before and the after inserted environments.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ shift{\isacharunderscore}{\kern0pt}eq{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}j\ {\isasymle}\ length\ xs{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ \ \ {\isachardoublequoteopen}{\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ j\ y{\isacharparenright}{\kern0pt}\ {\isacharbang}{\kern0pt}\ j\ {\isacharequal}{\kern0pt}\ y{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ xs\ arbitrary{\isacharcolon}{\kern0pt}\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ Nil\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Cons\ y\ ys{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{lemma}\isamarkupfalse%
+\ shift{\isacharunderscore}{\kern0pt}gt{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}i\ {\isasymle}\ length\ xs{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}j\ {\isacharless}{\kern0pt}\ i\ {\isasymLongrightarrow}\ {\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ i\ y{\isacharparenright}{\kern0pt}\ {\isacharbang}{\kern0pt}\ j\ {\isacharequal}{\kern0pt}\ xs\ {\isacharbang}{\kern0pt}\ j{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ xs\ arbitrary{\isacharcolon}{\kern0pt}\ i\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ Nil\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ i{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ simp\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Cons\ a\ xs{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ i{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{using}\isamarkupfalse%
+\ less{\isacharunderscore}{\kern0pt}Suc{\isacharunderscore}{\kern0pt}eq{\isacharunderscore}{\kern0pt}{\isadigit{0}}{\isacharunderscore}{\kern0pt}disj\ \isakeywordONE{by}\isamarkupfalse%
+\ fastforce\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{lemma}\isamarkupfalse%
+\ shift{\isacharunderscore}{\kern0pt}lt{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}i\ {\isacharless}{\kern0pt}\ j\ {\isasymLongrightarrow}\isanewline
+\ \ {\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ i\ y{\isacharparenright}{\kern0pt}\ {\isacharbang}{\kern0pt}\ j\ {\isacharequal}{\kern0pt}\ xs\ {\isacharbang}{\kern0pt}\ {\isacharparenleft}{\kern0pt}j\ {\isacharminus}{\kern0pt}\ {\isadigit{1}}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ xs\ arbitrary{\isacharcolon}{\kern0pt}\ i\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ Nil\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ i{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ simp\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Cons\ a\ xs{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}cases\ i{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Inserting y at the front and then U at position Suc i is the same as
+  first inserting U at position i and then y at the front.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ shift{\isacharunderscore}{\kern0pt}commute{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}insert{\isacharunderscore}{\kern0pt}at\ {\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ i\ y{\isadigit{1}}{\isacharparenright}{\kern0pt}\ {\isadigit{0}}\ y{\isadigit{2}}\isanewline
+\ \ \ {\isacharequal}{\kern0pt}\ insert{\isacharunderscore}{\kern0pt}at\ {\isacharparenleft}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at\ xs\ {\isadigit{0}}\ y{\isadigit{2}}{\isacharparenright}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Suc\ i{\isacharparenright}{\kern0pt}\ y{\isadigit{1}}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ xs\ arbitrary{\isacharcolon}{\kern0pt}\ i\ j{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ Nil\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Cons\ a\ xs{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Types and Typing Rules%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Simple types:
+  - Base n : a base type identified by a natural number n.
+  - Fun $\tau$ U : function type from $\tau$ to U (written $\tau \Rightarrow U$).%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{datatype}\isamarkupfalse%
+\ type\ {\isacharequal}{\kern0pt}\isanewline
+\ \ \ \ Base\ nat\isanewline
+\ \ {\isacharbar}{\kern0pt}\ Fun\ type\ type\ \ \ \ {\isacharparenleft}{\kern0pt}\isakeywordTWO{infixr}\ {\isacartoucheopen}{\isasymRightarrow}{\isacartoucheclose}\ {\isadigit{2}}{\isadigit{0}}{\isadigit{0}}{\isacharparenright}{\kern0pt}%
+\begin{isamarkuptext}%
+Typing environments map de Bruijn indices to types by list lookup.
+  The head corresponds to the most recently bound variable.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{type{\isacharunderscore}{\kern0pt}synonym}\isamarkupfalse%
+\ tyenv\ {\isacharequal}{\kern0pt}\ {\isachardoublequoteopen}type\ list{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Typing Rules:
+  - Var :
+    if i is in range and has type $\tau$ under environment $\Gamma$,
+    then variable i has type $\tau$.
+  - Abs :
+    if t has type $\tau_2$ under $\Gamma$ extended with $\tau$,
+    then Abs $\tau'$ t has type $\tau \to \tau_2$.
+  - App :
+    if s has type $\tau \to \tau_2$ and t has type $\tau$,
+    then $s \cdot t$ has type $\tau_2$.
+  - Val : numeric literals are assigned a fixed base type (here Base 1).%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{inductive}\isamarkupfalse%
+\ typing\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}tyenv\ {\isasymRightarrow}\ type\ exp\ {\isasymRightarrow}\ type\ {\isasymRightarrow}\ bool{\isachardoublequoteclose}\isanewline
+\ \ {\isacharparenleft}{\kern0pt}{\isacartoucheopen}{\isacharunderscore}{\kern0pt}\ {\isasymturnstile}\ {\isacharunderscore}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharunderscore}{\kern0pt}{\isacartoucheclose}\ {\isacharbrackleft}{\kern0pt}{\isadigit{5}}{\isadigit{0}}{\isacharcomma}{\kern0pt}\ {\isadigit{5}}{\isadigit{0}}{\isacharcomma}{\kern0pt}\ {\isadigit{5}}{\isadigit{0}}{\isacharbrackright}{\kern0pt}\ {\isadigit{5}}{\isadigit{0}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{where}\isanewline
+\ \ Var{\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}i\ {\isacharless}{\kern0pt}\ length\ {\isasymGamma}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isasymGamma}\ {\isacharbang}{\kern0pt}\ i\ {\isacharequal}{\kern0pt}\ {\isasymtau}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isasymGamma}\ {\isasymturnstile}\ Var\ i\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ Abs{\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}{\isasymtau}{\isadigit{1}}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isasymGamma}\ {\isasymturnstile}\ Abs\ {\isasymtau}{\isadigit{1}}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{2}}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ App{\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e{\isadigit{1}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{1}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isasymGamma}\ {\isasymturnstile}\ e{\isadigit{2}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isasymGamma}\ {\isasymturnstile}\ e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}{\isachardoublequoteclose}\isanewline
+{\isacharbar}{\kern0pt}\ Val{\isacharbrackleft}{\kern0pt}intro{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ {\isacharparenleft}{\kern0pt}Val\ v\ s{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Base\ s{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+Elimination (inversion) rules for the typing judgment.
+  They allow case analysis on a typing derivation of a specific syntactic form.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{inductive{\isacharunderscore}{\kern0pt}cases}\isamarkupfalse%
+\ typing{\isacharunderscore}{\kern0pt}elims\ {\isacharbrackleft}{\kern0pt}elim{\isacharbang}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Var\ i\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e{\isadigit{1}}\ {\isasymcdot}\ e{\isadigit{2}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Abs\ {\isasymtau}{\isadigit{1}}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Val\ v\ s\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Some examples%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Abs\ {\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{1}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ Val\ v\ s\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isasymcdot}\ Val\ v\ s\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{1}}\ {\isasymcdot}\ Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\isanewline
+\ \ Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{3}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{1}}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{2}}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{3}}\ {\isasymcdot}\ Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+\isanewline
+\isakeywordONE{schematic{\isacharunderscore}{\kern0pt}goal}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\isanewline
+\ \ Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{1}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{2}}\ {\isacharparenleft}{\kern0pt}Abs\ {\isacharquery}{\kern0pt}{\isasymtau}{\isadigit{3}}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{2}}\ {\isasymcdot}\ Var\ {\isadigit{0}}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{1}}\ {\isasymcdot}\ Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isacharquery}{\kern0pt}{\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+\ \ %
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{by}\isamarkupfalse%
+\ force%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsection{Theorems%
+}
+\isamarkuptrue%
+%
+\isamarkupsubsubsection{Substitution Lemma%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+We first show that lifting preserves well-typedness.
+  The lifting operation shifts free variable indices in an expression.
+  This lemma shows that lifting preserves typing:
+  if e is well-typed in environment $\Gamma$,
+  then lifting e by i yields a well-typed term in the environment
+  extended by inserting $\tau$' at position i.
+  This property is crucial for the substitution lemma,
+  particularly under the abstraction case.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ lift{\isacharunderscore}{\kern0pt}type{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \isakeywordTWO{and}\ {\isachardoublequoteopen}i\ {\isasymle}\ length\ {\isasymGamma}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}insert{\isacharunderscore}{\kern0pt}at\ {\isasymGamma}\ i\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isasymturnstile}\ lift\ e\ i\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induct\ arbitrary{\isacharcolon}{\kern0pt}\ i\ {\isasymtau}{\isacharprime}{\kern0pt}\ set{\isacharcolon}{\kern0pt}\ typing{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Var\ j\ {\isasymGamma}\ {\isasymtau}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ length{\isacharunderscore}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}gt{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ length{\isacharunderscore}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}lt{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{2}}{\isacharprime}{\kern0pt}\ {\isasymtau}\ {\isasymGamma}\ e\ {\isasymtau}{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ force\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}App\ {\isasymGamma}\ e{\isadigit{1}}\ {\isasymtau}{\isadigit{2}}\ {\isasymtau}{\isadigit{1}}\ e{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Val\ {\isasymGamma}\ s{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{using}\isamarkupfalse%
+\ typing{\isachardot}{\kern0pt}Val\ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Substitution lemma:
+  If $e_1$ is well-typed under environment $\Gamma_1$,
+  and $e_2$ is well-typed under $\Gamma_2$,
+  and $\Gamma_1$ = insert\_at $\Gamma_2$ i $\tau_2$,
+  then substituting $e_2$ for variable i in $e_1$ yields a well-typed term
+  under $\Gamma_2$ with the same type as $e_1$.
+  This formalises that well-typedness is preserved by substitution.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ subst{\isacharunderscore}{\kern0pt}lemma{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{fixes}\ i\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ nat\isanewline
+\ \ \ \ \isakeywordTWO{and}\ e{\isadigit{1}}\ e{\isadigit{2}}\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}type\ exp{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordTWO{and}\ {\isasymtau}{\isadigit{1}}\ {\isasymtau}{\isadigit{2}}\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ type\isanewline
+\ \ \ \ \isakeywordTWO{and}\ {\isasymGamma}{\isadigit{1}}\ {\isasymGamma}{\isadigit{2}}\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}tyenv{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}{\isasymGamma}{\isadigit{1}}\ {\isasymturnstile}\ e{\isadigit{1}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ \ \ \ \ {\isasymGamma}{\isadigit{2}}\ {\isasymturnstile}\ e{\isadigit{2}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ \ \ \ \ i\ {\isasymle}\ length\ {\isasymGamma}{\isadigit{2}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ \ \ \ \ {\isasymGamma}{\isadigit{1}}\ {\isacharequal}{\kern0pt}\ insert{\isacharunderscore}{\kern0pt}at\ {\isasymGamma}{\isadigit{2}}\ i\ {\isasymtau}{\isadigit{2}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ \ \ \ \ {\isasymGamma}{\isadigit{2}}\ {\isasymturnstile}\ e{\isadigit{1}}{\isacharbrackleft}{\kern0pt}e{\isadigit{2}}{\isacharslash}{\kern0pt}i{\isacharbrackright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induct\ arbitrary{\isacharcolon}{\kern0pt}\ {\isasymGamma}{\isadigit{2}}\ i\ {\isasymtau}{\isadigit{2}}\ e{\isadigit{2}}\ set{\isacharcolon}{\kern0pt}\ typing{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isasymGamma}{\isacharprime}{\kern0pt}\ e{\isacharprime}{\kern0pt}\ {\isasymtau}{\isadigit{2}}{\isacharprime}{\kern0pt}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ LIFT{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}{\isadigit{2}}\ {\isasymturnstile}\ lift\ e{\isadigit{2}}\ {\isadigit{0}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ Abs{\isachardot}{\kern0pt}prems{\isacharparenleft}{\kern0pt}{\isadigit{1}}{\isacharparenright}{\kern0pt}\ lift{\isacharunderscore}{\kern0pt}type\ \isakeywordONE{by}\isamarkupfalse%
+\ fastforce\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ LE{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}Suc\ i\ {\isasymle}\ length\ {\isacharparenleft}{\kern0pt}{\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}{\isadigit{2}}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\ \isakeywordONE{using}\isamarkupfalse%
+\ Abs{\isachardot}{\kern0pt}prems{\isacharparenleft}{\kern0pt}{\isadigit{2}}{\isacharparenright}{\kern0pt}\ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ ENV{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}{\isacharprime}{\kern0pt}\ {\isacharequal}{\kern0pt}\ insert{\isacharunderscore}{\kern0pt}at\ {\isacharparenleft}{\kern0pt}{\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}{\isadigit{2}}{\isacharparenright}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Suc\ i{\isacharparenright}{\kern0pt}\ {\isasymtau}{\isadigit{2}}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ Abs{\isachardot}{\kern0pt}prems{\isacharparenleft}{\kern0pt}{\isadigit{3}}{\isacharparenright}{\kern0pt}\ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}commute{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ IH{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymtau}{\isadigit{1}}{\isacharprime}{\kern0pt}\ {\isacharhash}{\kern0pt}\ {\isasymGamma}{\isadigit{2}}\ {\isasymturnstile}\ e{\isacharprime}{\kern0pt}{\isacharbrackleft}{\kern0pt}lift\ e{\isadigit{2}}\ {\isadigit{0}}\ {\isacharslash}{\kern0pt}\ Suc\ i{\isacharbrackright}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}{\isacharprime}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ Abs{\isachardot}{\kern0pt}hyps{\isacharparenleft}{\kern0pt}{\isadigit{2}}{\isacharparenright}{\kern0pt}\ ENV\ LE\ LIFT\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\ \ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ IH\ typing{\isachardot}{\kern0pt}Abs{\isacharparenright}{\kern0pt}\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Var\ j\ {\isasymGamma}\ {\isasymtau}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}Var{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}eq{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ length{\isacharunderscore}{\kern0pt}insert{\isacharunderscore}{\kern0pt}at{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \isakeywordONE{apply}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}lt{\isacharparenright}{\kern0pt}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ shift{\isacharunderscore}{\kern0pt}gt{\isacharparenright}{\kern0pt}\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}App\ {\isasymGamma}\ s\ {\isasymtau}\ {\isasymtau}{\isacharprime}{\kern0pt}\ t{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Val\ {\isasymGamma}\ s{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{using}\isamarkupfalse%
+\ typing{\isachardot}{\kern0pt}Val\ \isakeywordONE{by}\isamarkupfalse%
+\ fastforce\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Subject Reduction%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Subject reduction:
+  If a term e reduces to e' by a call-by-value step,
+  and e is well-typed,
+  then e' is also well-typed with the same type.
+  This ensures that evaluation preserves typing.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ subject{\isacharunderscore}{\kern0pt}reduction{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \isakeywordTWO{and}\ {\isachardoublequoteopen}e\ {\isasymrightarrow}\isactrlsub v\ e{\isacharprime}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e{\isacharprime}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induct\ arbitrary{\isacharcolon}{\kern0pt}\ e{\isacharprime}{\kern0pt}\ set{\isacharcolon}{\kern0pt}\ typing{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Var\ i\ {\isasymGamma}\ {\isasymtau}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isasymtau}\ {\isasymGamma}\ e\ {\isasymtau}{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}App\ {\isasymGamma}\ s\ {\isasymtau}\ {\isasymtau}{\isadigit{2}}\ t{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ subst{\isacharunderscore}{\kern0pt}lemma{\isacharparenright}{\kern0pt}\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Val\ {\isasymGamma}\ v{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{using}\isamarkupfalse%
+\ cbv{\isachardot}{\kern0pt}cases\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Multi-step subject reduction:
+  If e reduces to e' in zero or more steps,
+  then e' has the same type as e.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{theorem}\isamarkupfalse%
+\ subject{\isacharunderscore}{\kern0pt}reduction{\isacharprime}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}e\ {\isasymrightarrow}\isactrlsub v\isactrlsup {\isacharasterisk}{\kern0pt}\ e{\isacharprime}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \isakeywordTWO{and}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e{\isacharprime}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induct\ set{\isacharcolon}{\kern0pt}\ rtranclp{\isacharparenright}{\kern0pt}\ {\isacharparenleft}{\kern0pt}iprover\ intro{\isacharcolon}{\kern0pt}\ subject{\isacharunderscore}{\kern0pt}reduction{\isacharparenright}{\kern0pt}{\isacharplus}{\kern0pt}%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Progress%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Canonical forms for function types under CBV:
+  if a closed value has a function type, it must be an Abs.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ canonical{\isacharunderscore}{\kern0pt}fun{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ V{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ v{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \isakeywordTWO{and}\ T{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ v\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{2}}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}{\isasymexists}e{\isachardot}{\kern0pt}\ v\ {\isacharequal}{\kern0pt}\ Abs\ {\isasymtau}{\isadigit{1}}\ e{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ V\ T\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ cases\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}v{\isacharunderscore}{\kern0pt}abs\ t{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}thesis\isanewline
+\ \ \isakeywordONE{using}\isamarkupfalse%
+\ T\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}v{\isacharunderscore}{\kern0pt}nat\ n\ e{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{hence}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ Val\ n\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{1}}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{2}}{\isachardoublequoteclose}\ \isakeywordONE{using}\isamarkupfalse%
+\ T\ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordONE{have}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isasymtau}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{2}}\ {\isacharequal}{\kern0pt}\ Base\ {\isadigit{1}}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ cases\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{thus}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}thesis\ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Progress: closed, well-typed terms are values or can step.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ progress{\isacharcolon}{\kern0pt}\isanewline
+\ \ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}\ {\isasymLongrightarrow}\isanewline
+\ \ \ {\isasymGamma}\ {\isacharequal}{\kern0pt}\ {\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymLongrightarrow}\isanewline
+\ \ \ is{\isacharunderscore}{\kern0pt}val\ e\ {\isasymor}\ {\isacharparenleft}{\kern0pt}{\isasymexists}e{\isacharprime}{\kern0pt}{\isachardot}{\kern0pt}\ e\ {\isasymrightarrow}\isactrlsub v\ e{\isacharprime}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ arbitrary{\isacharcolon}{\kern0pt}\ {\isasymtau}\ set{\isacharcolon}{\kern0pt}\ typing{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Var\ i\ {\isasymGamma}{\isacharprime}{\kern0pt}\ {\isasymtau}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ simp\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isasymGamma}\ t\ {\isasymtau}{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Val\ {\isasymGamma}{\isacharprime}{\kern0pt}\ s{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{by}\isamarkupfalse%
+\ auto\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}App\ {\isasymGamma}{\isacharprime}{\kern0pt}\ t{\isadigit{1}}\ {\isasymtau}{\isadigit{2}}\ {\isasymtau}{\isadigit{1}}\ t{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ H{\isadigit{1}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymGamma}{\isacharprime}{\kern0pt}\ {\isasymturnstile}\ t{\isadigit{1}}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isadigit{2}}\ {\isasymRightarrow}\ {\isasymtau}{\isadigit{1}}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ App{\isachardot}{\kern0pt}hyps{\isacharparenleft}{\kern0pt}{\isadigit{1}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ H{\isadigit{2}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymGamma}{\isacharprime}{\kern0pt}\ {\isacharequal}{\kern0pt}\ {\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ App{\isachardot}{\kern0pt}prems{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ P{\isadigit{1}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ t{\isadigit{1}}\ {\isasymor}\ {\isacharparenleft}{\kern0pt}{\isasymexists}t{\isadigit{1}}{\isacharprime}{\kern0pt}{\isachardot}{\kern0pt}\ t{\isadigit{1}}\ {\isasymrightarrow}\isactrlsub v\ t{\isadigit{1}}{\isacharprime}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{by}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}simp\ add{\isacharcolon}{\kern0pt}\ App{\isachardot}{\kern0pt}IH{\isacharparenleft}{\kern0pt}{\isadigit{1}}{\isacharparenright}{\kern0pt}\ H{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ P{\isadigit{2}}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ t{\isadigit{1}}\ {\isasymLongrightarrow}\isanewline
+\ \ \ \ \ {\isacharparenleft}{\kern0pt}{\isasymexists}t{\isacharprime}{\kern0pt}{\isachardot}{\kern0pt}\ {\isacharparenleft}{\kern0pt}t{\isadigit{1}}\ {\isasymcdot}\ t{\isadigit{2}}{\isacharparenright}{\kern0pt}\ {\isasymrightarrow}\isactrlsub v\ t{\isacharprime}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ App{\isachardot}{\kern0pt}IH{\isacharparenleft}{\kern0pt}{\isadigit{2}}{\isacharparenright}{\kern0pt}\ H{\isadigit{1}}\ H{\isadigit{2}}\ canonical{\isacharunderscore}{\kern0pt}fun\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\ \ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \ \ \isakeywordONE{using}\isamarkupfalse%
+\ P{\isadigit{1}}\ P{\isadigit{2}}\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+Progress: a simpler corollary.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ progress{\isacharprime}{\kern0pt}{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ e\ {\isasymor}\ {\isacharparenleft}{\kern0pt}{\isasymexists}e{\isacharprime}{\kern0pt}{\isachardot}{\kern0pt}\ e\ {\isasymrightarrow}\isactrlsub v\ e{\isacharprime}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\ progress\ \isakeywordONE{by}\isamarkupfalse%
+\ auto%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Soundness%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Type soundness theorem:
+  If a closed term is well-typed and reduces (in zero or more steps)
+  to some term e', then e' is either a value or can take a further step.
+  This combines subject reduction and progress to establish
+  the standard type soundness property of the language.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{theorem}\isamarkupfalse%
+\ type{\isacharunderscore}{\kern0pt}soundness{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ WT{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ e\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \ \ \isakeywordTWO{and}\ STEPS{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}e\ {\isasymrightarrow}\isactrlsub v\isactrlsup {\isacharasterisk}{\kern0pt}\ e{\isacharprime}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}val\ e{\isacharprime}{\kern0pt}\ {\isasymor}\ {\isacharparenleft}{\kern0pt}{\isasymexists}u{\isachardot}{\kern0pt}\ e{\isacharprime}{\kern0pt}\ {\isasymrightarrow}\isactrlsub v\ u{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharminus}{\kern0pt}\isanewline
+\ \ \isakeywordONE{have}\isamarkupfalse%
+\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ e{\isacharprime}{\kern0pt}\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\ \isakeywordONE{using}\isamarkupfalse%
+\ STEPS\ WT\ subject{\isacharunderscore}{\kern0pt}reduction{\isacharprime}{\kern0pt}\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\ \ \isakeywordTHREE{thus}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}thesis\ \isakeywordONE{using}\isamarkupfalse%
+\ progress{\isacharprime}{\kern0pt}\ \isakeywordONE{by}\isamarkupfalse%
+\ blast\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\isatagdocument
+%
+\isamarkupsubsubsection{Closed%
+}
+\isamarkuptrue%
+%
+\endisatagdocument
+{\isafolddocument}%
+%
+\isadelimdocument
+%
+\endisadelimdocument
+%
+\begin{isamarkuptext}%
+Set of free variables.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{primrec}\isamarkupfalse%
+\ fv\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}type\ exp\ {\isacharequal}{\kern0pt}{\isachargreater}{\kern0pt}\ nat\ set{\isachardoublequoteclose}\ \isakeywordTWO{where}\isanewline
+\ \ \ \ fv{\isacharunderscore}{\kern0pt}Var{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}Var\ i{\isacharparenright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ {\isacharbraceleft}{\kern0pt}i{\isacharbraceright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ fv{\isacharunderscore}{\kern0pt}App{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}t\ {\isasymcdot}\ u{\isacharparenright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ fv\ t\ {\isasymunion}\ fv\ u{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ fv{\isacharunderscore}{\kern0pt}Abs{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ t{\isacharparenright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ {\isacharparenleft}{\kern0pt}{\isasymlambda}\ i{\isachardot}{\kern0pt}\ i\ {\isacharminus}{\kern0pt}\ {\isadigit{1}}{\isacharparenright}{\kern0pt}\ {\isacharbackquote}{\kern0pt}\ {\isacharparenleft}{\kern0pt}fv\ t\ {\isacharminus}{\kern0pt}\ {\isacharbraceleft}{\kern0pt}{\isadigit{0}}{\isacharbraceright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\ \ {\isacharbar}{\kern0pt}\ fv{\isacharunderscore}{\kern0pt}Val{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}Val\ t\ s{\isacharparenright}{\kern0pt}\ {\isacharequal}{\kern0pt}\ {\isacharbraceleft}{\kern0pt}{\isacharbraceright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{value}\isamarkupfalse%
+\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{5}}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{2}}\ {\isasymcdot}\ Val\ {\isadigit{1}}\ {\isadigit{8}}\ {\isasymcdot}\ Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\isakeywordONE{value}\isamarkupfalse%
+\ {\isachardoublequoteopen}fv\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isacharprime}{\kern0pt}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{2}}\ {\isasymcdot}\ Var\ {\isadigit{0}}\ {\isasymcdot}\ {\isacharparenleft}{\kern0pt}Var\ {\isadigit{1}}\ {\isasymcdot}\ Var\ {\isadigit{0}}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isacharparenright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+\isanewline
+\isanewline
+\isakeywordONE{abbreviation}\isamarkupfalse%
+\ is{\isacharunderscore}{\kern0pt}closed\ {\isacharcolon}{\kern0pt}{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}type\ exp\ {\isasymRightarrow}\ bool{\isachardoublequoteclose}\ \isakeywordTWO{where}\isanewline
+\ \ {\isachardoublequoteopen}is{\isacharunderscore}{\kern0pt}closed\ t\ {\isasymequiv}\ fv\ t\ {\isacharequal}{\kern0pt}\ {\isacharbraceleft}{\kern0pt}{\isacharbraceright}{\kern0pt}{\isachardoublequoteclose}%
+\begin{isamarkuptext}%
+The length of the typing environment conrresponds the indices of free variables.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ envlen{\isacharunderscore}{\kern0pt}fv{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ Ty{\isacharcolon}{\kern0pt}\ {\isachardoublequoteopen}{\isasymGamma}\ {\isasymturnstile}\ t\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}{\isasymforall}\ i\ {\isasymin}\ fv\ t{\isachardot}{\kern0pt}\ i\ {\isacharless}{\kern0pt}\ length\ {\isasymGamma}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\isanewline
+\isakeywordONE{proof}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}induction\ arbitrary{\isacharcolon}{\kern0pt}\ {\isasymtau}\ set{\isacharcolon}{\kern0pt}\ typing{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Var\ i\ {\isasymGamma}{\isacharprime}{\kern0pt}\ {\isasymtau}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Abs\ {\isasymtau}{\isadigit{1}}\ {\isasymGamma}\ t\ {\isasymtau}{\isadigit{2}}{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}App\ {\isasymGamma}\ s\ {\isasymtau}\ {\isasymtau}{\isadigit{2}}\ t{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{next}\isamarkupfalse%
+\isanewline
+\ \ \isakeywordTHREE{case}\isamarkupfalse%
+\ {\isacharparenleft}{\kern0pt}Val\ {\isasymGamma}\ s{\isacharparenright}{\kern0pt}\isanewline
+\ \ \isakeywordONE{then}\isamarkupfalse%
+\ \isakeywordTHREE{show}\isamarkupfalse%
+\ {\isacharquery}{\kern0pt}case\isanewline
+\ \ \isakeywordONE{apply}\isamarkupfalse%
+\ auto\isanewline
+\ \ \isakeywordONE{done}\isamarkupfalse%
+\isanewline
+\isakeywordONE{qed}\isamarkupfalse%
+%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\begin{isamarkuptext}%
+If typable, then it is closed.%
+\end{isamarkuptext}\isamarkuptrue%
+\isakeywordONE{lemma}\isamarkupfalse%
+\ emp{\isacharunderscore}{\kern0pt}env{\isacharunderscore}{\kern0pt}closed{\isacharcolon}{\kern0pt}\isanewline
+\ \ \isakeywordTWO{assumes}\ {\isachardoublequoteopen}{\isacharbrackleft}{\kern0pt}{\isacharbrackright}{\kern0pt}\ {\isasymturnstile}\ t\ {\isacharcolon}{\kern0pt}\ {\isasymtau}{\isachardoublequoteclose}\isanewline
+\ \ \ \ \isakeywordTWO{shows}\ {\isachardoublequoteopen}fv\ t\ {\isacharequal}{\kern0pt}\ {\isacharbraceleft}{\kern0pt}{\isacharbraceright}{\kern0pt}{\isachardoublequoteclose}\isanewline
+%
+\isadelimproof
+%
+\endisadelimproof
+%
+\isatagproof
+\isakeywordONE{using}\isamarkupfalse%
+\ assms\ envlen{\isacharunderscore}{\kern0pt}fv\ \isakeywordONE{by}\isamarkupfalse%
+\ fastforce%
+\endisatagproof
+{\isafoldproof}%
+%
+\isadelimproof
+\isanewline
+%
+\endisadelimproof
+\isanewline
+%
+\isadelimtheory
+\isanewline
+%
+\endisadelimtheory
+%
+\isatagtheory
+\isakeywordTWO{end}\isamarkupfalse%
+%
+\endisatagtheory
+{\isafoldtheory}%
+%
+\isadelimtheory
+%
+\endisadelimtheory
+%
+\end{isabellebody}%
+\endinput
+%:%file=~/work/dev/isabelle-proof/gitlab/lambda-gt-formal/STLC.thy%:%
+%:%11=13%:%
+%:%15=16%:%
+%:%31=19%:%
+%:%32=19%:%
+%:%33=20%:%
+%:%34=21%:%
+%:%39=21%:%
+%:%42=22%:%
+%:%43=23%:%
+%:%44=24%:%
+%:%45=24%:%
+%:%52=27%:%
+%:%64=30%:%
+%:%65=31%:%
+%:%66=32%:%
+%:%70=36%:%
+%:%71=37%:%
+%:%72=38%:%
+%:%73=39%:%
+%:%74=40%:%
+%:%76=42%:%
+%:%77=42%:%
+%:%78=43%:%
+%:%79=44%:%
+%:%80=45%:%
+%:%81=46%:%
+%:%83=50%:%
+%:%84=51%:%
+%:%86=53%:%
+%:%87=53%:%
+%:%88=54%:%
+%:%89=55%:%
+%:%90=56%:%
+%:%91=57%:%
+%:%92=58%:%
+%:%93=59%:%
+%:%94=60%:%
+%:%95=61%:%
+%:%97=65%:%
+%:%98=66%:%
+%:%99=67%:%
+%:%101=69%:%
+%:%102=69%:%
+%:%103=70%:%
+%:%104=71%:%
+%:%105=72%:%
+%:%106=73%:%
+%:%107=74%:%
+%:%108=75%:%
+%:%109=76%:%
+%:%110=77%:%
+%:%111=78%:%
+%:%112=79%:%
+%:%113=80%:%
+%:%114=80%:%
+%:%115=81%:%
+%:%116=82%:%
+%:%117=83%:%
+%:%118=84%:%
+%:%119=84%:%
+%:%120=85%:%
+%:%121=85%:%
+%:%129=88%:%
+%:%141=92%:%
+%:%143=94%:%
+%:%144=94%:%
+%:%145=95%:%
+%:%146=96%:%
+%:%148=100%:%
+%:%149=101%:%
+%:%150=102%:%
+%:%151=103%:%
+%:%152=104%:%
+%:%154=106%:%
+%:%155=106%:%
+%:%156=107%:%
+%:%157=108%:%
+%:%158=109%:%
+%:%159=110%:%
+%:%160=111%:%
+%:%161=112%:%
+%:%162=113%:%
+%:%163=114%:%
+%:%167=120%:%
+%:%169=122%:%
+%:%170=122%:%
+%:%171=123%:%
+%:%172=124%:%
+%:%173=125%:%
+%:%174=126%:%
+%:%176=130%:%
+%:%178=132%:%
+%:%179=132%:%
+%:%180=133%:%
+%:%181=134%:%
+%:%182=135%:%
+%:%189=138%:%
+%:%201=142%:%
+%:%202=143%:%
+%:%203=144%:%
+%:%205=148%:%
+%:%206=148%:%
+%:%209=149%:%
+%:%213=149%:%
+%:%214=149%:%
+%:%219=149%:%
+%:%222=150%:%
+%:%223=151%:%
+%:%224=152%:%
+%:%225=152%:%
+%:%228=153%:%
+%:%232=153%:%
+%:%233=153%:%
+%:%238=153%:%
+%:%241=154%:%
+%:%242=155%:%
+%:%243=156%:%
+%:%244=156%:%
+%:%245=157%:%
+%:%252=158%:%
+%:%253=158%:%
+%:%254=159%:%
+%:%255=159%:%
+%:%256=160%:%
+%:%257=161%:%
+%:%258=161%:%
+%:%259=162%:%
+%:%260=163%:%
+%:%261=163%:%
+%:%262=164%:%
+%:%263=165%:%
+%:%264=165%:%
+%:%265=166%:%
+%:%266=167%:%
+%:%267=167%:%
+%:%268=168%:%
+%:%269=168%:%
+%:%270=169%:%
+%:%271=170%:%
+%:%272=170%:%
+%:%273=171%:%
+%:%274=171%:%
+%:%275=171%:%
+%:%276=172%:%
+%:%291=175%:%
+%:%303=179%:%
+%:%312=183%:%
+%:%324=187%:%
+%:%325=188%:%
+%:%327=190%:%
+%:%328=190%:%
+%:%330=194%:%
+%:%332=196%:%
+%:%333=196%:%
+%:%334=197%:%
+%:%335=198%:%
+%:%336=199%:%
+%:%338=203%:%
+%:%340=205%:%
+%:%341=205%:%
+%:%342=206%:%
+%:%349=207%:%
+%:%350=207%:%
+%:%351=208%:%
+%:%352=208%:%
+%:%353=209%:%
+%:%354=209%:%
+%:%355=209%:%
+%:%356=210%:%
+%:%357=210%:%
+%:%358=211%:%
+%:%359=211%:%
+%:%360=212%:%
+%:%361=212%:%
+%:%362=213%:%
+%:%363=213%:%
+%:%364=214%:%
+%:%365=214%:%
+%:%366=215%:%
+%:%367=215%:%
+%:%368=215%:%
+%:%369=216%:%
+%:%370=216%:%
+%:%371=217%:%
+%:%372=217%:%
+%:%373=218%:%
+%:%374=218%:%
+%:%375=219%:%
+%:%385=222%:%
+%:%387=226%:%
+%:%388=226%:%
+%:%389=227%:%
+%:%390=228%:%
+%:%397=229%:%
+%:%398=229%:%
+%:%399=230%:%
+%:%400=230%:%
+%:%401=231%:%
+%:%402=231%:%
+%:%403=232%:%
+%:%404=232%:%
+%:%405=232%:%
+%:%406=233%:%
+%:%407=233%:%
+%:%408=234%:%
+%:%409=234%:%
+%:%410=235%:%
+%:%411=235%:%
+%:%412=236%:%
+%:%413=236%:%
+%:%414=237%:%
+%:%415=237%:%
+%:%416=238%:%
+%:%417=238%:%
+%:%418=238%:%
+%:%419=239%:%
+%:%420=239%:%
+%:%421=240%:%
+%:%422=240%:%
+%:%423=241%:%
+%:%424=241%:%
+%:%425=242%:%
+%:%431=242%:%
+%:%434=243%:%
+%:%435=244%:%
+%:%436=246%:%
+%:%437=247%:%
+%:%438=247%:%
+%:%439=248%:%
+%:%440=249%:%
+%:%447=250%:%
+%:%448=250%:%
+%:%449=251%:%
+%:%450=251%:%
+%:%451=252%:%
+%:%452=252%:%
+%:%453=253%:%
+%:%454=253%:%
+%:%455=253%:%
+%:%456=254%:%
+%:%457=254%:%
+%:%458=255%:%
+%:%459=255%:%
+%:%460=256%:%
+%:%461=256%:%
+%:%462=257%:%
+%:%463=257%:%
+%:%464=258%:%
+%:%465=258%:%
+%:%466=259%:%
+%:%467=259%:%
+%:%468=259%:%
+%:%469=260%:%
+%:%470=260%:%
+%:%471=261%:%
+%:%472=261%:%
+%:%473=262%:%
+%:%474=262%:%
+%:%475=262%:%
+%:%476=263%:%
+%:%482=263%:%
+%:%485=264%:%
+%:%486=265%:%
+%:%487=267%:%
+%:%488=268%:%
+%:%489=268%:%
+%:%490=269%:%
+%:%491=270%:%
+%:%498=271%:%
+%:%499=271%:%
+%:%500=272%:%
+%:%501=272%:%
+%:%502=273%:%
+%:%503=273%:%
+%:%504=273%:%
+%:%505=274%:%
+%:%506=274%:%
+%:%507=275%:%
+%:%508=275%:%
+%:%509=276%:%
+%:%510=276%:%
+%:%511=277%:%
+%:%512=277%:%
+%:%513=278%:%
+%:%514=278%:%
+%:%515=279%:%
+%:%516=279%:%
+%:%517=279%:%
+%:%518=280%:%
+%:%519=280%:%
+%:%520=281%:%
+%:%521=281%:%
+%:%522=282%:%
+%:%523=282%:%
+%:%524=283%:%
+%:%534=287%:%
+%:%535=288%:%
+%:%537=290%:%
+%:%538=290%:%
+%:%539=291%:%
+%:%540=292%:%
+%:%547=293%:%
+%:%548=293%:%
+%:%549=294%:%
+%:%550=294%:%
+%:%551=295%:%
+%:%552=295%:%
+%:%553=295%:%
+%:%554=296%:%
+%:%555=296%:%
+%:%556=297%:%
+%:%557=297%:%
+%:%558=298%:%
+%:%559=298%:%
+%:%560=299%:%
+%:%561=299%:%
+%:%562=299%:%
+%:%563=300%:%
+%:%564=300%:%
+%:%565=301%:%
+%:%580=304%:%
+%:%592=308%:%
+%:%593=309%:%
+%:%594=310%:%
+%:%596=312%:%
+%:%597=312%:%
+%:%598=313%:%
+%:%599=314%:%
+%:%601=318%:%
+%:%602=319%:%
+%:%604=321%:%
+%:%605=321%:%
+%:%607=325%:%
+%:%608=326%:%
+%:%609=327%:%
+%:%610=328%:%
+%:%611=329%:%
+%:%612=330%:%
+%:%613=331%:%
+%:%614=332%:%
+%:%615=333%:%
+%:%616=334%:%
+%:%617=335%:%
+%:%619=337%:%
+%:%620=337%:%
+%:%621=338%:%
+%:%622=339%:%
+%:%623=340%:%
+%:%624=341%:%
+%:%625=342%:%
+%:%627=344%:%
+%:%628=345%:%
+%:%629=346%:%
+%:%630=347%:%
+%:%631=348%:%
+%:%632=349%:%
+%:%634=351%:%
+%:%635=352%:%
+%:%636=353%:%
+%:%638=357%:%
+%:%639=358%:%
+%:%641=360%:%
+%:%642=360%:%
+%:%643=361%:%
+%:%644=362%:%
+%:%645=363%:%
+%:%646=364%:%
+%:%653=367%:%
+%:%663=369%:%
+%:%664=369%:%
+%:%667=370%:%
+%:%671=370%:%
+%:%672=370%:%
+%:%677=370%:%
+%:%680=371%:%
+%:%681=372%:%
+%:%682=372%:%
+%:%685=373%:%
+%:%689=373%:%
+%:%690=373%:%
+%:%695=373%:%
+%:%698=374%:%
+%:%699=375%:%
+%:%700=375%:%
+%:%703=376%:%
+%:%707=376%:%
+%:%708=376%:%
+%:%713=376%:%
+%:%716=377%:%
+%:%717=378%:%
+%:%718=379%:%
+%:%719=379%:%
+%:%722=380%:%
+%:%726=380%:%
+%:%727=380%:%
+%:%732=380%:%
+%:%735=381%:%
+%:%736=382%:%
+%:%737=383%:%
+%:%738=384%:%
+%:%739=384%:%
+%:%742=385%:%
+%:%746=385%:%
+%:%747=385%:%
+%:%752=385%:%
+%:%755=386%:%
+%:%756=387%:%
+%:%757=388%:%
+%:%758=388%:%
+%:%759=389%:%
+%:%762=390%:%
+%:%766=390%:%
+%:%767=390%:%
+%:%772=390%:%
+%:%775=391%:%
+%:%776=392%:%
+%:%777=393%:%
+%:%778=393%:%
+%:%779=394%:%
+%:%782=395%:%
+%:%786=395%:%
+%:%787=395%:%
+%:%801=398%:%
+%:%805=401%:%
+%:%817=405%:%
+%:%818=406%:%
+%:%819=407%:%
+%:%820=408%:%
+%:%821=409%:%
+%:%822=410%:%
+%:%823=411%:%
+%:%824=412%:%
+%:%826=414%:%
+%:%827=414%:%
+%:%828=415%:%
+%:%829=416%:%
+%:%830=417%:%
+%:%837=418%:%
+%:%838=418%:%
+%:%839=419%:%
+%:%840=419%:%
+%:%841=420%:%
+%:%842=420%:%
+%:%843=421%:%
+%:%844=421%:%
+%:%845=421%:%
+%:%846=422%:%
+%:%847=422%:%
+%:%848=423%:%
+%:%849=423%:%
+%:%850=424%:%
+%:%851=424%:%
+%:%852=425%:%
+%:%853=425%:%
+%:%854=426%:%
+%:%855=426%:%
+%:%856=427%:%
+%:%857=427%:%
+%:%858=428%:%
+%:%859=428%:%
+%:%860=429%:%
+%:%861=429%:%
+%:%862=430%:%
+%:%863=430%:%
+%:%864=430%:%
+%:%865=431%:%
+%:%866=431%:%
+%:%867=432%:%
+%:%868=432%:%
+%:%869=433%:%
+%:%870=433%:%
+%:%871=434%:%
+%:%872=434%:%
+%:%873=435%:%
+%:%874=435%:%
+%:%875=436%:%
+%:%876=436%:%
+%:%877=436%:%
+%:%878=437%:%
+%:%879=437%:%
+%:%880=438%:%
+%:%881=438%:%
+%:%882=439%:%
+%:%883=439%:%
+%:%884=440%:%
+%:%885=440%:%
+%:%886=441%:%
+%:%887=441%:%
+%:%888=441%:%
+%:%889=442%:%
+%:%890=442%:%
+%:%891=442%:%
+%:%892=443%:%
+%:%902=448%:%
+%:%903=449%:%
+%:%904=450%:%
+%:%905=451%:%
+%:%906=452%:%
+%:%907=453%:%
+%:%908=454%:%
+%:%910=456%:%
+%:%911=456%:%
+%:%912=457%:%
+%:%913=458%:%
+%:%914=459%:%
+%:%915=460%:%
+%:%916=461%:%
+%:%920=465%:%
+%:%927=466%:%
+%:%928=466%:%
+%:%929=467%:%
+%:%930=467%:%
+%:%931=468%:%
+%:%932=468%:%
+%:%933=469%:%
+%:%934=469%:%
+%:%935=469%:%
+%:%936=470%:%
+%:%937=470%:%
+%:%938=470%:%
+%:%939=470%:%
+%:%940=471%:%
+%:%941=471%:%
+%:%942=472%:%
+%:%943=472%:%
+%:%944=472%:%
+%:%945=473%:%
+%:%946=473%:%
+%:%947=474%:%
+%:%948=474%:%
+%:%949=474%:%
+%:%950=475%:%
+%:%951=475%:%
+%:%952=476%:%
+%:%953=476%:%
+%:%954=477%:%
+%:%955=477%:%
+%:%956=478%:%
+%:%957=478%:%
+%:%958=479%:%
+%:%959=479%:%
+%:%960=479%:%
+%:%961=480%:%
+%:%962=480%:%
+%:%963=481%:%
+%:%964=481%:%
+%:%965=482%:%
+%:%966=482%:%
+%:%967=483%:%
+%:%968=483%:%
+%:%969=484%:%
+%:%970=484%:%
+%:%971=485%:%
+%:%972=485%:%
+%:%973=486%:%
+%:%974=486%:%
+%:%975=487%:%
+%:%976=487%:%
+%:%977=488%:%
+%:%978=488%:%
+%:%979=488%:%
+%:%980=489%:%
+%:%981=489%:%
+%:%982=490%:%
+%:%983=490%:%
+%:%984=491%:%
+%:%985=491%:%
+%:%986=492%:%
+%:%987=492%:%
+%:%988=492%:%
+%:%989=493%:%
+%:%990=493%:%
+%:%991=493%:%
+%:%992=494%:%
+%:%1007=497%:%
+%:%1019=501%:%
+%:%1020=502%:%
+%:%1021=503%:%
+%:%1022=504%:%
+%:%1023=505%:%
+%:%1025=507%:%
+%:%1026=507%:%
+%:%1027=508%:%
+%:%1028=509%:%
+%:%1029=510%:%
+%:%1036=511%:%
+%:%1037=511%:%
+%:%1038=512%:%
+%:%1039=512%:%
+%:%1040=513%:%
+%:%1041=513%:%
+%:%1042=514%:%
+%:%1043=514%:%
+%:%1044=514%:%
+%:%1045=515%:%
+%:%1046=515%:%
+%:%1047=516%:%
+%:%1048=516%:%
+%:%1049=517%:%
+%:%1050=517%:%
+%:%1051=518%:%
+%:%1052=518%:%
+%:%1053=518%:%
+%:%1054=519%:%
+%:%1055=519%:%
+%:%1056=520%:%
+%:%1057=520%:%
+%:%1058=521%:%
+%:%1059=521%:%
+%:%1060=522%:%
+%:%1061=522%:%
+%:%1062=522%:%
+%:%1063=523%:%
+%:%1064=523%:%
+%:%1065=524%:%
+%:%1066=524%:%
+%:%1067=525%:%
+%:%1068=525%:%
+%:%1069=526%:%
+%:%1070=526%:%
+%:%1071=527%:%
+%:%1072=527%:%
+%:%1073=527%:%
+%:%1074=528%:%
+%:%1075=528%:%
+%:%1076=528%:%
+%:%1077=529%:%
+%:%1087=533%:%
+%:%1088=534%:%
+%:%1089=535%:%
+%:%1091=537%:%
+%:%1092=537%:%
+%:%1093=538%:%
+%:%1094=539%:%
+%:%1095=540%:%
+%:%1102=541%:%
+%:%1103=541%:%
+%:%1104=542%:%
+%:%1105=542%:%
+%:%1119=545%:%
+%:%1131=549%:%
+%:%1132=550%:%
+%:%1134=552%:%
+%:%1135=552%:%
+%:%1136=553%:%
+%:%1137=554%:%
+%:%1138=555%:%
+%:%1145=556%:%
+%:%1146=556%:%
+%:%1147=557%:%
+%:%1148=557%:%
+%:%1149=558%:%
+%:%1150=558%:%
+%:%1151=559%:%
+%:%1152=559%:%
+%:%1153=559%:%
+%:%1154=560%:%
+%:%1155=560%:%
+%:%1156=560%:%
+%:%1157=561%:%
+%:%1158=561%:%
+%:%1159=562%:%
+%:%1160=562%:%
+%:%1161=563%:%
+%:%1162=563%:%
+%:%1163=563%:%
+%:%1164=563%:%
+%:%1165=564%:%
+%:%1166=564%:%
+%:%1167=564%:%
+%:%1168=565%:%
+%:%1169=565%:%
+%:%1170=566%:%
+%:%1171=566%:%
+%:%1172=567%:%
+%:%1173=567%:%
+%:%1174=567%:%
+%:%1175=568%:%
+%:%1185=572%:%
+%:%1187=574%:%
+%:%1188=574%:%
+%:%1189=575%:%
+%:%1191=577%:%
+%:%1198=578%:%
+%:%1199=578%:%
+%:%1200=579%:%
+%:%1201=579%:%
+%:%1202=580%:%
+%:%1203=580%:%
+%:%1204=580%:%
+%:%1205=581%:%
+%:%1206=581%:%
+%:%1207=582%:%
+%:%1208=582%:%
+%:%1209=583%:%
+%:%1210=583%:%
+%:%1211=584%:%
+%:%1212=584%:%
+%:%1213=584%:%
+%:%1214=585%:%
+%:%1215=585%:%
+%:%1216=586%:%
+%:%1217=586%:%
+%:%1218=587%:%
+%:%1219=587%:%
+%:%1220=588%:%
+%:%1221=588%:%
+%:%1222=588%:%
+%:%1223=589%:%
+%:%1224=589%:%
+%:%1225=590%:%
+%:%1226=590%:%
+%:%1227=591%:%
+%:%1228=591%:%
+%:%1229=592%:%
+%:%1230=592%:%
+%:%1231=593%:%
+%:%1232=593%:%
+%:%1233=594%:%
+%:%1234=594%:%
+%:%1235=595%:%
+%:%1236=595%:%
+%:%1237=596%:%
+%:%1238=596%:%
+%:%1239=597%:%
+%:%1240=597%:%
+%:%1241=598%:%
+%:%1242=598%:%
+%:%1243=599%:%
+%:%1244=600%:%
+%:%1245=600%:%
+%:%1246=600%:%
+%:%1247=601%:%
+%:%1248=601%:%
+%:%1249=602%:%
+%:%1250=602%:%
+%:%1251=602%:%
+%:%1252=603%:%
+%:%1262=607%:%
+%:%1264=609%:%
+%:%1265=609%:%
+%:%1266=610%:%
+%:%1267=611%:%
+%:%1274=612%:%
+%:%1275=612%:%
+%:%1276=612%:%
+%:%1290=615%:%
+%:%1302=619%:%
+%:%1303=620%:%
+%:%1304=621%:%
+%:%1305=622%:%
+%:%1306=623%:%
+%:%1308=625%:%
+%:%1309=625%:%
+%:%1310=626%:%
+%:%1311=627%:%
+%:%1312=628%:%
+%:%1319=629%:%
+%:%1320=629%:%
+%:%1321=630%:%
+%:%1322=630%:%
+%:%1323=630%:%
+%:%1324=630%:%
+%:%1325=631%:%
+%:%1326=631%:%
+%:%1327=631%:%
+%:%1328=631%:%
+%:%1329=632%:%
+%:%1344=635%:%
+%:%1356=639%:%
+%:%1358=641%:%
+%:%1359=641%:%
+%:%1360=642%:%
+%:%1361=643%:%
+%:%1362=644%:%
+%:%1363=645%:%
+%:%1364=646%:%
+%:%1365=647%:%
+%:%1366=648%:%
+%:%1367=649%:%
+%:%1368=649%:%
+%:%1369=650%:%
+%:%1370=650%:%
+%:%1371=651%:%
+%:%1372=652%:%
+%:%1373=653%:%
+%:%1374=653%:%
+%:%1375=654%:%
+%:%1377=658%:%
+%:%1379=660%:%
+%:%1380=660%:%
+%:%1381=661%:%
+%:%1382=662%:%
+%:%1389=663%:%
+%:%1390=663%:%
+%:%1391=664%:%
+%:%1392=664%:%
+%:%1393=665%:%
+%:%1394=665%:%
+%:%1395=666%:%
+%:%1396=666%:%
+%:%1397=666%:%
+%:%1398=667%:%
+%:%1399=667%:%
+%:%1400=668%:%
+%:%1401=668%:%
+%:%1402=669%:%
+%:%1403=669%:%
+%:%1404=670%:%
+%:%1405=670%:%
+%:%1406=671%:%
+%:%1407=671%:%
+%:%1408=671%:%
+%:%1409=672%:%
+%:%1410=672%:%
+%:%1411=673%:%
+%:%1412=673%:%
+%:%1413=674%:%
+%:%1414=674%:%
+%:%1415=675%:%
+%:%1416=675%:%
+%:%1417=676%:%
+%:%1418=676%:%
+%:%1419=676%:%
+%:%1420=677%:%
+%:%1421=677%:%
+%:%1422=678%:%
+%:%1423=678%:%
+%:%1424=679%:%
+%:%1425=679%:%
+%:%1426=680%:%
+%:%1427=680%:%
+%:%1428=681%:%
+%:%1429=681%:%
+%:%1430=681%:%
+%:%1431=682%:%
+%:%1432=682%:%
+%:%1433=683%:%
+%:%1434=683%:%
+%:%1435=684%:%
+%:%1445=688%:%
+%:%1447=690%:%
+%:%1448=690%:%
+%:%1449=691%:%
+%:%1450=692%:%
+%:%1457=693%:%
+%:%1458=693%:%
+%:%1459=693%:%
+%:%1464=693%:%
+%:%1467=694%:%
+%:%1470=695%:%
+%:%1475=696%:%
